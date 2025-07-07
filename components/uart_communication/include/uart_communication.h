@@ -17,8 +17,8 @@
 #define ESP32_UART_BUFFER_SIZE                  256
 #define ESP32_UART_QUEUE_SIZE                   5
 #define ESP32_UART_PORT                         UART_NUM_2// UART_NUM_0
-#define ESP32_UART_TX_PIN                       GPIO_NUM_16// GPIO_NUM_43
-#define ESP32_UART_RX_PIN                       GPIO_NUM_15//  GPIO_NUM_44
+#define ESP32_UART_TX_PIN                       GPIO_NUM_15// GPIO_NUM_43
+#define ESP32_UART_RX_PIN                       GPIO_NUM_16//  GPIO_NUM_44
 #define ESP32_UART_RTS_PIN                      UART_PIN_NO_CHANGE
 #define ESP32_UART_CTS_PIN                      UART_PIN_NO_CHANGE
 #define ESP32_UART_BAUDRATE_RF                  115200
