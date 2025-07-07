@@ -6,3 +6,6 @@ cmake_minimum_required(VERSION 3.5)
 set(EXTRA_COMPONENT_DIRS /home/andyc/Documentos/esp_32_projects/esp-idf-lib/components)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(sower_functions)
+
+
+ 
