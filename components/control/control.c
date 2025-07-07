@@ -197,11 +197,16 @@ static void init_endstop(gpio_num_t endstop, gpio_isr_t isr_handler)
 static esp_err_t verify_endstop(QueueHandle_t endstop_queue)
 {
     int info = 0;
-    if(xQueueReceive(endstop_queue, &info, portMAX_DELAY))
+    while(true)
     {
-        return ESP_OK;
+        if(xQueueReceive(endstop_queue, &info, pdMS_TO_TICKS(10)))
+        {
+            xQueueReset(endstop_queue);
+            return ESP_OK;
+        }
+        vTaskDelay(pdMS_TO_TICKS(100));       
     }
-
+    
     return ESP_FAIL;
 }
 
