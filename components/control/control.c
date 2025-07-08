@@ -21,8 +21,8 @@ motors_vars_t linear_motor = {
     .pwm_B = LINEAR_MOTOR_PWM_B,
 };
 
-static QueueHandle_t endstop_up_queue = NULL;
-static QueueHandle_t endstop_dw_queue = NULL;
+//static QueueHandle_t endstop_up_queue = NULL;
+//static QueueHandle_t endstop_dw_queue = NULL;
 
 
 /**
@@ -34,7 +34,7 @@ static QueueHandle_t endstop_dw_queue = NULL;
  * @retval ESP_FAIL: Timeout. 
  * 
  */
-static esp_err_t verify_endstop(QueueHandle_t endstop_queue);
+//static esp_err_t verify_endstop(QueueHandle_t endstop_queue);
 
 /**
  * @brief Initializes endstop sensor.
@@ -42,14 +42,17 @@ static esp_err_t verify_endstop(QueueHandle_t endstop_queue);
  * @param[in] endstop: GPIO pin for endstop.
  * @param[in] isr_handler: handler for gpio interruption.
  */
-static void init_endstop(gpio_num_t endstop, gpio_isr_t isr_handler);
+//static void init_endstop(gpio_num_t endstop, gpio_isr_t isr_handler);
 
 /**
  * @brief Endstop interrumption handler
  * 
  * @param[in] args: GPIO_PIN that cause interruption
  */
-static void endstop_intrr_handler(void *args);
+//static void endstop_intrr_handler(void *args);
+
+
+static esp_err_t verify_endstop_polling(gpio_num_t endstop);
 
 
 esp_err_t init_cutter_motors()
@@ -70,12 +73,13 @@ esp_err_t init_cutter_motors()
 
     // -- linear sensors
     ESP_LOGI(TAG, "Linear sensors are initializing...");
-    endstop_up_queue = xQueueCreate(5, sizeof(int));    
-    endstop_dw_queue = xQueueCreate(5, sizeof(int));
+    linear_motor_sensors(LINEAR_SENSOR_DW, LINEAR_SENSOR_UP);
+    //endstop_up_queue = xQueueCreate(5, sizeof(int));    
+    //endstop_dw_queue = xQueueCreate(5, sizeof(int));
     
-    gpio_install_isr_service(0);
-    init_endstop(LINEAR_SENSOR_UP, endstop_intrr_handler);
-    init_endstop(LINEAR_SENSOR_DW, endstop_intrr_handler);
+    //gpio_install_isr_service(0);
+    //init_endstop(LINEAR_SENSOR_UP, endstop_intrr_handler);
+    //init_endstop(LINEAR_SENSOR_DW, endstop_intrr_handler);
 
     return ESP_OK;
 }
@@ -118,7 +122,7 @@ esp_err_t raise_effector()
     }
 
     // reset the endstop queue
-    xQueueReset(endstop_up_queue);
+    //xQueueReset(endstop_up_queue);
 
     // turn on the linear motors
     ESP_LOGI(TAG, "Linear motor up state...");
@@ -127,7 +131,7 @@ esp_err_t raise_effector()
     ESP_ERROR_CHECK(bdc_motor_set_speed(linear_motor.motor_handler, BDC_DUTY_CYCLE(PWM_LINEAR_MOTOR)));
 
     // return response 
-    return verify_endstop(endstop_up_queue);
+    return verify_endstop_polling(LINEAR_SENSOR_UP);
 }
 
 esp_err_t lower_effector()
@@ -139,7 +143,7 @@ esp_err_t lower_effector()
     }
 
     // reset the endstop queue 
-    xQueueReset(endstop_dw_queue);
+    //xQueueReset(endstop_dw_queue);
 
     ESP_LOGI(TAG, "Linear motor down state...");
     enable_pins_bts7960(linear_motor.ena_A, linear_motor.ena_B);
@@ -147,7 +151,7 @@ esp_err_t lower_effector()
     ESP_ERROR_CHECK(bdc_motor_set_speed(linear_motor.motor_handler, BDC_DUTY_CYCLE(PWM_LINEAR_MOTOR)));
 
     // return response 
-    return verify_endstop(endstop_dw_queue);
+    return verify_endstop_polling(LINEAR_SENSOR_DW);
 }
 
 esp_err_t stop_effector()
@@ -182,6 +186,7 @@ esp_err_t stop_test_rpms()
 //------------------------------    ENDSTOP FUNCTIONS   -----------------------------------//
 //-----------------------------------------------------------------------------------------//
 
+/*
 static void init_endstop(gpio_num_t endstop, gpio_isr_t isr_handler)
 {
     // set pin input intrr
@@ -193,7 +198,9 @@ static void init_endstop(gpio_num_t endstop, gpio_isr_t isr_handler)
     gpio_isr_handler_add(endstop, isr_handler, (void *)endstop);
 
 }
+*/
 
+/*
 static esp_err_t verify_endstop(QueueHandle_t endstop_queue)
 {
     int info = 0;
@@ -209,7 +216,9 @@ static esp_err_t verify_endstop(QueueHandle_t endstop_queue)
     
     return ESP_FAIL;
 }
+*/
 
+/*
 static void IRAM_ATTR endstop_intrr_handler(void *args)
 {
     int which_endstop = (int)args;
@@ -221,4 +230,27 @@ static void IRAM_ATTR endstop_intrr_handler(void *args)
         xQueueSendFromISR(endstop_dw_queue, &which_endstop, NULL);
     }
 
+}
+*/
+
+esp_err_t verify_endstop_polling(gpio_num_t endstop)
+{
+    uint8_t attempts = 100;
+    uint8_t i = 1;
+    
+    // read each 500ms until gets 1 logical state 
+    for(i = 1 ; i <= attempts ; i++)
+    {
+        if(gpio_get_level(endstop))
+        {
+            // send OK for 1 logical state
+            return ESP_OK;
+        }
+        
+        vTaskDelay(pdMS_TO_TICKS(500));
+    
+    }
+    
+    // timeout 
+    return ESP_FAIL;   
 }
