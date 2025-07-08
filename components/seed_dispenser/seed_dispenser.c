@@ -280,5 +280,5 @@ void seed_dispenser_task_start()
     g_seed_dispenser_cmd_queue = xQueueCreate(5, sizeof(seed_dispenser_cmd_e));
 
     xTaskCreatePinnedToCore(seed_dispenser_task, "seed_dispenser", SEED_DISPENSER_STACK_SIZE, NULL, SEED_DISPENSER_TASK_PRIORITY, NULL, SEED_DISPENSER_CORE_ID);
-    xTaskCreatePinnedToCore(seed_dispenser_update_task, "seed_update", 2048, NULL, 15, NULL, 1);
+    xTaskCreatePinnedToCore(seed_dispenser_update_task, "seed_update", SEED_UPDATE_STACK_SIZE, NULL, SEED_UPDATE_TASK_PRIORITY, NULL, SEED_DISPENSER_CORE_ID);
 }
