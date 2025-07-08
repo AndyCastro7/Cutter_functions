@@ -8,9 +8,9 @@
 #include "driver/uart.h"
 
 // Task configuration
-#define ESP32_UART_TASK_CORE_ID                 1
+#define ESP32_UART_TASK_CORE_ID                 0
 #define ESP32_UART_TASK_RECEIVE_PRIORITY        4
-#define ESP32_UART_TASK_TRANSFER_PRIORITY       2
+#define ESP32_UART_TASK_TRANSFER_PRIORITY       4
 #define ESP32_UART_TASK_STACK_SIZE              1024 * 2
 
 // UART configuration
