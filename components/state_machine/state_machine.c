@@ -392,7 +392,7 @@ void sower_event_handler_loop(void *args)
                 break;
             }
         }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
