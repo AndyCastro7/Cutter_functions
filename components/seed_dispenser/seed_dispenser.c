@@ -94,14 +94,13 @@ static void seed_dispenser_update_task(void *pvParameters)
         if(xQueueReceive(g_seed_dispenser_isr_data_queue, &seed_dispenser_real_pulses, pdMS_TO_TICKS(10)) == pdTRUE)
         {
             float seed_dispenser_new_speed = 0.0f;
-
             float seed_dispenser_error = g_seed_dispenser_handle->desired_speed - abs(seed_dispenser_real_pulses);
 
             pid_compute(g_seed_dispenser_handle->pid_ctrl, seed_dispenser_error, &seed_dispenser_new_speed);
-
             bdc_motor_set_speed(g_seed_dispenser_handle->motor, (uint32_t)seed_dispenser_new_speed);
-
             g_seed_dispenser_handle->report_pulses = seed_dispenser_real_pulses;
+
+            // printf("pulses: %d\n", g_seed_dispenser_handle->report_pulses);
         }
 
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -116,12 +115,19 @@ esp_err_t seed_dispenser_start_event_handler(void)
         ESP_ERROR_CHECK(gptimer_start(g_seed_dispenser_pid_gptimer));
         seed_dispenser_update_state(SD_STATE_STARTED);
         ESP_LOGI(TAG, "Event: Timer is running");
+        if ( bdc_motor_forward(g_seed_dispenser_handle->motor) != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Error: BDC motor cannot start dispenser!");
+            return ESP_FAIL;
+        }
+        ESP_LOGI(TAG, "Seed dispenser started!");
+        g_is_timer_running = true;
         return ESP_OK;
     }
     else
     {
         ESP_LOGW(TAG, "Warning: Timer is already started");
-        return ESP_FAIL;
+        return ESP_OK;
     }
 }
 
@@ -132,12 +138,19 @@ esp_err_t seed_dispenser_stop_event_handler(void)
         ESP_ERROR_CHECK(gptimer_stop(g_seed_dispenser_pid_gptimer));
         seed_dispenser_update_state(SD_STATE_STOPPED);
         ESP_LOGI(TAG, "Event: Timer is stopped");
+        if ( bdc_motor_brake(g_seed_dispenser_handle->motor) != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Error: BDC motor cannot stop dispenser!");
+            return ESP_FAIL;
+        }
+        ESP_LOGI(TAG, "Seed dispenser stopped!");
+        g_is_timer_running = false;
         return ESP_OK;
     }
     else
     {
         ESP_LOGW(TAG, "Warning: Timer is already stopped");
-        return ESP_FAIL;
+        return ESP_OK;
     }
 }
 
@@ -170,6 +183,8 @@ static void seed_dispenser_task(void *pvParameters)
     ESP_LOGI(TAG, "Initializing task");
 
     g_seed_dispenser_handle = (motor_control_context_t *)malloc(sizeof(motor_control_context_t));
+
+    g_seed_dispenser_handle->desired_speed = SEED_DISPENSER_DESIRED_SPEED;
 
     /* Configure BDC_MOTOR */
     bdc_motor_config_t motor_config = {
@@ -220,10 +235,11 @@ static void seed_dispenser_task(void *pvParameters)
     ESP_ERROR_CHECK(pcnt_unit_start(pcnt_unit));
     g_seed_dispenser_handle->pcnt_encoder = pcnt_unit;
 
+    /* kp = 0.6, ki = 0.4, kd = 0.2 */
     /* Configure PID Control*/
     pid_ctrl_parameter_t pid_runtime_param = {
-        .kp = 0.6,
-        .ki = 0.4,
+        .kp = 10.2,
+        .ki = 1.8,
         .kd = 0.2,
         .cal_type = PID_CAL_TYPE_INCREMENTAL,
         .max_output   = BDC_MCPWM_DUTY_TICK_MAX - 1,
@@ -280,5 +296,5 @@ void seed_dispenser_task_start()
     g_seed_dispenser_cmd_queue = xQueueCreate(5, sizeof(seed_dispenser_cmd_e));
 
     xTaskCreatePinnedToCore(seed_dispenser_task, "seed_dispenser", SEED_DISPENSER_STACK_SIZE, NULL, SEED_DISPENSER_TASK_PRIORITY, NULL, SEED_DISPENSER_CORE_ID);
-    xTaskCreatePinnedToCore(seed_dispenser_update_task, "seed_update", 2048, NULL, 15, NULL, 1);
+    xTaskCreatePinnedToCore(seed_dispenser_update_task, "seed_update", 4048, NULL, 15, NULL, 1);
 }

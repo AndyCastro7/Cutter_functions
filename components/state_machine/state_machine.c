@@ -260,9 +260,9 @@ esp_err_t sower_stop_dispenser_event_handler(void)
     }
 
     seed_dispenser_state_e state;
-    if (xQueueReceive(g_seed_dispenser_data_queue, &state, pdMS_TO_TICKS(100)) == pdTRUE)
+    if (xQueueReceive(g_seed_dispenser_data_queue, &state, pdMS_TO_TICKS(500)) == pdTRUE)
     {
-        if (state == SD_STATE_STARTED)
+        if (state == SD_STATE_STOPPED)
         {
             sower_event_t event = {
                 .arg = 0.0f,
