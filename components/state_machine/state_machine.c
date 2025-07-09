@@ -145,7 +145,6 @@ esp_err_t sower_start_cutter_event_handler(void)
     return ESP_OK;
 }
 
-
 /*Motor linear evento*/
 esp_err_t sower_linear_motor_rise_event_handler(void)
 {
@@ -312,6 +311,31 @@ esp_err_t sower_echo_event_handler()
     return ESP_OK;
 }
 
+esp_err_t sower_restart_cutter_event_handler(void)
+{
+    if (stop_cutter() != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Error: Cannot restart cutter");
+        sower_event_t event = {
+            .arg = 0.0f,
+            .error = SOWER_ERROR_LMOTOR_DONT_RISE,
+            .event = SOWER_EVENT_ERROR};
+
+        sower_send_to_uart_transmit_queue(event);
+        return ESP_FAIL;
+    }
+
+    sower_event_t event = {
+        .arg = 0.0f,
+        .error = SOWER_ERROR_NONE,
+        .event = SOWER_EVENT_CUTTER_RESTARTED
+    };
+
+    sower_send_to_uart_transmit_queue(event);
+
+    return ESP_OK;
+}
+
 esp_err_t sower_default_event_handler(void)
 {
     sower_event_t event = {
@@ -378,6 +402,11 @@ void sower_event_handler_loop(void *args)
                 ESP_LOGI(TAG, "STOP DISPENSER EVENT");
 
                 sower_stop_dispenser_event_handler();
+                break;
+
+            case SOWER_CMD_RESET_CUTTER:
+                ESP_LOGI(TAG, "RESET CUTTER EVENT");
+                sower_restart_cutter_event_handler();
                 break;
 
             case SOWER_CMD_ECHO_SOWER:

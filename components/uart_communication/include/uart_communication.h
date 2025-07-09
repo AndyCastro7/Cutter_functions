@@ -39,6 +39,7 @@ typedef enum
     SOWER_CMD_LINEAR_MOTOR_DOWN,     /**< Put the linear motors in down state. */
     SOWER_CMD_START_DISPENSER,     /**< Start the dispenser. */
     SOWER_CMD_STOP_DISPENSER,      /**< Stop the dispenser. */
+    SOWER_CMD_RESET_CUTTER,
     SOWER_CMD_ECHO_SOWER,
     SOWER_CMD_ERROR,              /**< Command no identified. */
 } sower_cmd_e;
@@ -72,6 +73,7 @@ typedef enum
     SOWER_EVENT_TEMPERATURE_MEASURE, /**< Temperature measure */
     SOWER_EVENT_HUMEDITY_MEASURE,   /**< Humedity measure */
     SOWER_EVENT_CUTTER_RPM_MEASURE, /**< Cutter rpm measure */
+    SOWER_EVENT_CUTTER_RESTARTED,
     SOWER_EVENT_ECHO_MSG,
 } sower_events_e;
 
@@ -127,6 +129,7 @@ static inline const char* sower_event_name(sower_events_e event)
         case SOWER_EVENT_HUMEDITY_MEASURE:   return "SOWER_EVENT_HUMEDITY_MEASURE";
         case SOWER_EVENT_CUTTER_RPM_MEASURE: return "SOWER_EVENT_CUTTER_RPM_MEASURE";
         case SOWER_EVENT_ECHO_MSG:           return "SOWER_EVENT_ECHO_MSG";
+        case SOWER_EVENT_CUTTER_RESTARTED:   return "SOWER_EVENT_CUTTER_RESTARTED";
         default:                             return "UNKNOWN_EVENT";
     }
 }
