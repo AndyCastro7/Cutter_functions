@@ -235,8 +235,8 @@ static void IRAM_ATTR endstop_intrr_handler(void *args)
 
 esp_err_t verify_endstop_polling(gpio_num_t endstop)
 {
-    uint8_t attempts = 100;
-    uint8_t i = 1;
+    uint32_t attempts = 500;
+    uint32_t i = 1;
     
     // read each 500ms until gets 1 logical state 
     for(i = 1 ; i <= attempts ; i++)
@@ -247,7 +247,7 @@ esp_err_t verify_endstop_polling(gpio_num_t endstop)
             return ESP_OK;
         }
         
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(50));
     
     }
     
