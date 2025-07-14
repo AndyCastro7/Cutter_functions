@@ -23,5 +23,5 @@
 // 11.25 pulses @100ms -> 7.5RPM
 // 90 pulses @100ms -> 60RPM
 // Original: 2
-#define SEED_DISPENSER_DESIRED_SPEED    4  // Pulses
+#define SEED_DISPENSER_DESIRED_SPEED    2  // Pulses
 #endif

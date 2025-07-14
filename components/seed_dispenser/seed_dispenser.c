@@ -100,7 +100,7 @@ static void seed_dispenser_update_task(void *pvParameters)
             bdc_motor_set_speed(g_seed_dispenser_handle->motor, (uint32_t)seed_dispenser_new_speed);
             g_seed_dispenser_handle->report_pulses = seed_dispenser_real_pulses;
 
-            // printf("pulses: %d\n", g_seed_dispenser_handle->report_pulses);
+            printf("pulses: /*%.2f*/\n", g_seed_dispenser_handle->report_pulses * (7.5f / 2.0f));
         }
 
         vTaskDelay(pdMS_TO_TICKS(10));
