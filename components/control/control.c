@@ -131,7 +131,13 @@ esp_err_t raise_effector()
     ESP_ERROR_CHECK(bdc_motor_set_speed(linear_motor.motor_handler, BDC_DUTY_CYCLE(PWM_LINEAR_MOTOR)));
 
     // return response 
-    return verify_endstop_polling(LINEAR_SENSOR_UP);
+    esp_err_t valid_state = verify_endstop_polling(LINEAR_SENSOR_UP);
+
+    // stop motor 
+    stop_effector();
+
+    // return state
+    return valid_state;
 }
 
 esp_err_t lower_effector()
@@ -151,7 +157,14 @@ esp_err_t lower_effector()
     ESP_ERROR_CHECK(bdc_motor_set_speed(linear_motor.motor_handler, BDC_DUTY_CYCLE(PWM_LINEAR_MOTOR)));
 
     // return response 
-    return verify_endstop_polling(LINEAR_SENSOR_DW);
+    esp_err_t valid_state = verify_endstop_polling(LINEAR_SENSOR_DW);
+
+    // stop motor
+    stop_effector();
+
+    // return state
+    return valid_state;
+
 }
 
 esp_err_t stop_effector()
